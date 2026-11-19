@@ -1,0 +1,696 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Waste Management System</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5f2;
+    color: #26332b;
+}
+
+header {
+    background: #176b45;
+    color: white;
+    padding: 22px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+header h1 {
+    font-size: 24px;
+}
+
+nav button {
+    background: white;
+    color: #176b45;
+    border: none;
+    padding: 10px 15px;
+    margin: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.hero {
+    background: linear-gradient(120deg, #176b45, #36a269);
+    color: white;
+    padding: 65px 8%;
+    text-align: center;
+}
+
+.hero h2 {
+    font-size: 34px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+}
+
+h2, h3 {
+    margin-bottom: 16px;
+    color: #176b45;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #ccd8ce;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+
+button.action {
+    background: #176b45;
+    color: white;
+    padding: 11px 17px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+}
+
+button.delete {
+    background: #c0392b;
+}
+
+button:hover {
+    opacity: 0.88;
+}
+
+.dashboard {
+    display: none;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #e1f2e7;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat h3 {
+    font-size: 27px;
+    margin: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    min-width: 550px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #e1f2e7;
+    color: #176b45;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    background: #174b35;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+}
+
+@media(max-width:600px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero h2 {
+        font-size: 26px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>♻ Smart Waste Management</h1>
+    <nav>
+        <button onclick="showHome()">Home</button>
+        <button onclick="showLogin('admin')">Admin</button>
+        <button onclick="showLogin('public')">Public</button>
+        <button onclick="showLogin('driver')">Driver</button>
+    </nav>
+</header>
+
+<section class="hero" id="home">
+    <h2>Keep Our Environment Clean</h2>
+    <p>
+        Smart waste collection, garbage bin monitoring and
+        efficient transportation for a cleaner future.
+    </p>
+</section>
+
+<div class="container">
+
+    <section class="card" id="loginSection">
+        <h2 id="loginTitle">Login</h2>
+        <form onsubmit="login(event)">
+            <input type="text" id="username" placeholder="Enter username" required>
+            <input type="password" id="password" placeholder="Enter password" required>
+            <button class="action" type="submit">Login</button>
+        </form>
+        <p id="loginMessage"></p>
+        <p id="registerLink">
+            New user?
+            <button class="action" onclick="showRegister()">Register</button>
+        </p>
+    </section>
+
+    <section class="card hidden" id="registerSection">
+        <h2>Public Registration</h2>
+        <form onsubmit="registerUser(event)">
+            <input id="regName" placeholder="Full Name" required>
+            <input id="regEmail" type="email" placeholder="Email Address" required>
+            <input id="regPassword" type="password" placeholder="Password" required>
+            <button class="action">Create Account</button>
+        </form>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section class="dashboard" id="adminDashboard">
+        <div class="card">
+            <h2>Administrator Dashboard</h2>
+            <div class="stats">
+                <div class="stat">
+                    <p>Total Garbage Bins</p>
+                    <h3 id="binCount">0</h3>
+                </div>
+                <div class="stat">
+                    <p>Total Drivers</p>
+                    <h3 id="driverCount">0</h3>
+                </div>
+                <div class="stat">
+                    <p>Public Complaints</p>
+                    <h3 id="complaintCount">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Create Garbage Bin</h3>
+            <form onsubmit="addBin(event)">
+                <input id="binLocation" placeholder="Bin Location" required>
+                <select id="binStatus">
+                    <option value="Empty">Empty</option>
+                    <option value="Half Full">Half Full</option>
+                    <option value="Full">Full</option>
+                </select>
+                <button class="action">Add Garbage Bin</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Garbage Bin Management</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bin ID</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="binTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Manage Drivers</h3>
+            <form onsubmit="addDriver(event)">
+                <input id="driverName" placeholder="Driver Name" required>
+                <input id="driverRoute" placeholder="Assigned Route" required>
+                <button class="action">Add Driver</button>
+            </form>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Driver</th>
+                            <th>Assigned Route</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="driverTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Assign Best Route</h3>
+            <form onsubmit="assignRoute(event)">
+                <select id="routeDriver" required></select>
+                <input id="routeName" placeholder="Route / Collection Area" required>
+                <button class="action">Assign Route</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Public Complaints</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complaint</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Update</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminComplaintTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="action" onclick="logout()">Logout</button>
+    </section>
+
+    <!-- PUBLIC DASHBOARD -->
+    <section class="dashboard" id="publicDashboard">
+        <div class="card">
+            <h2>General Public Dashboard</h2>
+            <p>Register complaints and monitor garbage collection activities.</p>
+        </div>
+
+        <div class="card">
+            <h3>Register a Complaint</h3>
+            <form onsubmit="addComplaint(event)">
+                <input id="complaintLocation" placeholder="Complaint Location" required>
+                <textarea id="complaintText" placeholder="Describe your complaint" required></textarea>
+                <button class="action">Submit Complaint</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>My Complaints and Status</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complaint</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myComplaintTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="action" onclick="logout()">Logout</button>
+    </section>
+
+    <!-- DRIVER DASHBOARD -->
+    <section class="dashboard" id="driverDashboard">
+        <div class="card">
+            <h2>Driver Dashboard</h2>
+            <h3>Daily Work Updates</h3>
+            <p id="dailyRoute">No route assigned yet.</p>
+        </div>
+
+        <div class="card">
+            <h3>Choose Best Route</h3>
+            <select id="driverRouteChoice">
+                <option value="">Select a route</option>
+            </select>
+            <button class="action" onclick="chooseRoute()">Choose Route</button>
+            <p id="selectedRoute"></p>
+        </div>
+
+        <div class="card">
+            <h3>Update Garbage Load</h3>
+            <input type="number" id="garbageLoad" placeholder="Garbage collected (kg)" min="0">
+            <button class="action" onclick="updateLoad()">Update Load</button>
+            <p id="loadMessage"></p>
+        </div>
+
+        <button class="action" onclick="logout()">Logout</button>
+    </section>
+
+</div>
+
+<footer>
+    <p>Smart Waste Management System | Clean Environment, Healthy Life</p>
+</footer>
+
+<script>
+let bins = JSON.parse(localStorage.getItem("bins")) || [];
+let drivers = JSON.parse(localStorage.getItem("drivers")) || [];
+let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let routes = JSON.parse(localStorage.getItem("routes")) || [];
+let currentUser = null;
+
+function saveData() {
+    localStorage.setItem("bins", JSON.stringify(bins));
+    localStorage.setItem("drivers", JSON.stringify(drivers));
+    localStorage.setItem("complaints", JSON.stringify(complaints));
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("routes", JSON.stringify(routes));
+}
+
+function hideAll() {
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("registerSection").classList.add("hidden");
+
+    document.querySelectorAll(".dashboard").forEach(d => {
+        d.style.display = "none";
+    });
+}
+
+function showHome() {
+    hideAll();
+    document.getElementById("home").style.display = "block";
+    document.getElementById("loginSection").classList.remove("hidden");
+}
+
+function showLogin(role) {
+    hideAll();
+    document.getElementById("home").style.display = "none";
+    document.getElementById("loginSection").classList.remove("hidden");
+    document.getElementById("loginTitle").textContent =
+        role.charAt(0).toUpperCase() + role.slice(1) + " Login";
+    document.getElementById("loginSection").dataset.role = role;
+    document.getElementById("registerLink").style.display =
+        role === "public" ? "block" : "none";
+    document.getElementById("loginMessage").textContent = "";
+}
+
+function showRegister() {
+    hideAll();
+    document.getElementById("home").style.display = "none";
+    document.getElementById("registerSection").classList.remove("hidden");
+}
+
+function registerUser(event) {
+    event.preventDefault();
+
+    users.push({
+        name: document.getElementById("regName").value,
+        email: document.getElementById("regEmail").value,
+        password: document.getElementById("regPassword").value
+    });
+
+    saveData();
+    alert("Registration successful. Please login.");
+    showLogin("public");
+}
+
+function login(event) {
+    event.preventDefault();
+
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    let role = document.getElementById("loginSection").dataset.role;
+
+    if (role === "admin" && username === "admin" && password === "admin123") {
+        currentUser = { role: "admin", name: "Administrator" };
+        showDashboard("adminDashboard");
+    }
+    else if (role === "driver") {
+        let driver = drivers.find(d => d.name === username && d.password === password);
+        if (driver) {
+            currentUser = { role: "driver", name: driver.name };
+            showDashboard("driverDashboard");
+        } else {
+            alert("Driver not found. Add the driver through the admin dashboard first.");
+        }
+    }
+    else if (role === "public") {
+        let user = users.find(u =>
+            (u.email === username || u.name === username) &&
+            u.password === password
+        );
+
+        if (user) {
+            currentUser = { role: "public", name: user.name };
+            showDashboard("publicDashboard");
+        } else {
+            alert("Invalid public user login. Register first.");
+        }
+    }
+}
+
+function showDashboard(id) {
+    hideAll();
+    document.getElementById("home").style.display = "none";
+    document.getElementById(id).style.display = "block";
+    refreshDashboard();
+}
+
+function logout() {
+    currentUser = null;
+    showHome();
+}
+
+function addBin(event) {
+    event.preventDefault();
+
+    bins.push({
+        id: Date.now(),
+        location: document.getElementById("binLocation").value,
+        status: document.getElementById("binStatus").value
+    });
+
+    saveData();
+    refreshDashboard();
+    event.target.reset();
+}
+
+function deleteBin(id) {
+    bins = bins.filter(b => b.id !== id);
+    saveData();
+    refreshDashboard();
+}
+
+function updateBin(id) {
+    let bin = bins.find(b => b.id === id);
+    let location = prompt("Enter new bin location:", bin.location);
+    if (location === null) return;
+
+    let status = prompt("Enter status: Empty, Half Full or Full", bin.status);
+    if (status === null) return;
+
+    bin.location = location;
+    bin.status = status;
+    saveData();
+    refreshDashboard();
+}
+
+function addDriver(event) {
+    event.preventDefault();
+
+    let name = document.getElementById("driverName").value;
+    let route = document.getElementById("driverRoute").value;
+
+    drivers.push({
+        name: name,
+        route: route,
+        password: "driver123"
+    });
+
+    routes.push(route);
+    saveData();
+    refreshDashboard();
+    event.target.reset();
+    alert("Driver added. Default login password: driver123");
+}
+
+function deleteDriver(name) {
+    drivers = drivers.filter(d => d.name !== name);
+    saveData();
+    refreshDashboard();
+}
+
+function assignRoute(event) {
+    event.preventDefault();
+
+    let driverName = document.getElementById("routeDriver").value;
+    let route = document.getElementById("routeName").value;
+    let driver = drivers.find(d => d.name === driverName);
+
+    if (driver) {
+        driver.route = route;
+        if (!routes.includes(route)) routes.push(route);
+        saveData();
+        refreshDashboard();
+        alert("Route assigned successfully.");
+        event.target.reset();
+    }
+}
+
+function addComplaint(event) {
+    event.preventDefault();
+
+    complaints.push({
+        user: currentUser.name,
+        location: document.getElementById("complaintLocation").value,
+        description: document.getElementById("complaintText").value,
+        status: "Pending"
+    });
+
+    saveData();
+    refreshDashboard();
+    event.target.reset();
+    alert("Complaint submitted successfully.");
+}
+
+function updateComplaint(index) {
+    complaints[index].status = "Resolved";
+    saveData();
+    refreshDashboard();
+}
+
+function chooseRoute() {
+    let route = document.getElementById("driverRouteChoice").value;
+    document.getElementById("selectedRoute").textContent =
+        route ? "Selected Route: " + route : "Please select a route.";
+}
+
+function updateLoad() {
+    let load = document.getElementById("garbageLoad").value;
+
+    if (load === "" || Number(load) < 0) {
+        alert("Enter a valid garbage load.");
+        return;
+    }
+
+    document.getElementById("loadMessage").textContent =
+        "Garbage load updated: " + load + " kg";
+}
+
+function refreshDashboard() {
+    document.getElementById("binCount").textContent = bins.length;
+    document.getElementById("driverCount").textContent = drivers.length;
+    document.getElementById("complaintCount").textContent = complaints.length;
+
+    document.getElementById("binTable").innerHTML = bins.map(b => `
+        <tr>
+            <td>${b.id}</td>
+            <td>${b.location}</td>
+            <td>${b.status}</td>
+            <td>
+                <button class="action" onclick="updateBin(${b.id})">Edit</button>
+                <button class="action delete" onclick="deleteBin(${b.id})">Delete</button>
+            </td>
+        </tr>
+    `).join("");
+
+    document.getElementById("driverTable").innerHTML = drivers.map(d => `
+        <tr>
+            <td>${d.name}</td>
+            <td>${d.route}</td>
+            <td><button class="action delete" onclick="deleteDriver('${d.name.replace(/'/g, "\\'")}')">Remove</button></td>
+        </tr>
+    `).join("");
+
+    document.getElementById("routeDriver").innerHTML =
+        drivers.map(d => `<option value="${d.name}">${d.name}</option>`).join("");
+
+    document.getElementById("adminComplaintTable").innerHTML =
+        complaints.map((c, i) => `
+            <tr>
+                <td>${c.description}</td>
+                <td>${c.location}</td>
+                <td>${c.status}</td>
+                <td>
+                    <button class="action" onclick="updateComplaint(${i})">
+                        Mark Resolved
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+
+    document.getElementById("myComplaintTable").innerHTML =
+        complaints.filter(c => currentUser && c.user === currentUser.name)
+        .map(c => `
+            <tr>
+                <td>${c.description}</td>
+                <td>${c.location}</td>
+                <td>${c.status}</td>
+            </tr>
+        `).join("");
+
+    document.getElementById("driverRouteChoice").innerHTML =
+        '<option value="">Select a route</option>' +
+        [...new Set(routes)].map(r =>
+            `<option value="${r}">${r}</option>`
+        ).join("");
+
+    if (currentUser && currentUser.role === "driver") {
+        let driver = drivers.find(d => d.name === currentUser.name);
+        document.getElementById("dailyRoute").textContent =
+            driver ? "Today's assigned route: " + driver.route :
+            "No route assigned yet.";
+    }
+}
+
+showHome();
+</script>
+
+</body>
+</html>
